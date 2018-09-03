@@ -23,6 +23,9 @@
 class PicoTags extends AbstractPicoPlugin
 {
 
+    public $filtered_pages = array();
+    public $page_tags = array();
+
     /**
      * Register the "Tags" and "Filter" meta header fields.
      *
@@ -65,14 +68,30 @@ class PicoTags extends AbstractPicoPlugin
      */
     public function onPagesLoaded(&$pages, &$currentPage, &$previousPage, &$nextPage)
     {
+     
+        foreach($pages as &$page){
+            if(!is_array($page['meta']['tags'])){
+                $page['meta']['tags'] = PicoTags::parseTags($page['meta']['tags']);
+            }
+        }
+
         if ($currentPage && !empty($currentPage['meta']['filter'])) {
             $tagsToShow = $currentPage['meta']['filter'];
 
-            $pages = array_filter($pages, function ($page) use ($tagsToShow) {
-                $tags = PicoTags::parseTags($page['meta']['tags']);
+            $this->filtered_pages = array_filter($pages, function ($page) use ($tagsToShow) {
+                $tags = $page['meta']['tags'];
                 return count(array_intersect($tagsToShow, $tags)) > 0;
             });
         }
+    }
+
+    public function onPageRendering(&$twig, &$twigVariables, &$templateName)
+    {
+        if($this->filtered_pages)
+            $twigVariables['filtered_pages'] = $this->filtered_pages;
+
+        if($this->page_tags)
+            $twigVariables['page_tags'] = $this->page_tags;
     }
 
     /**
