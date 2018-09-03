@@ -42,13 +42,15 @@ Template: blog-list
 These are all my blog posts:
 ```
 
+You'll also need to use the `filtered_pages` array in twig.
+
 Actually looping through the filtered list of pages (in the above case, pages tagged `blog`) to display them would be
 done in the template file, e.g.:
 
 ### In themes/default/blog-list.html
 ```twig
 {{ content }}
-{% for page in pages if page.title %}
+{% for page in filtered_pages if page.title %}
     <article>
         <h2><a href="{{ page.url }}">{{ page.title }}</a></h2>
         <p>{{ page.description }}</p>
